@@ -1,0 +1,19 @@
+_____ Comando Git ______
+
+git clone ...
+	add caminho ssh do repositório no git
+	clona o repositório
+
+git status
+	mostra os arquivos alterados
+
+git add *
+	inclui todos os arquivos alterados para serem upados
+
+git commit -m "..."
+	add comentário e as alterações foram salvas
+
+git push
+	sobe as alterações pra nuvem
+	
+	
