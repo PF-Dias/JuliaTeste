@@ -15,5 +15,6 @@ git commit -m "..."
 
 git push
 	sobe as alterações pra nuvem
-	
-	
+
+git pull
+	baixa todas as atualizações da nuvem	
