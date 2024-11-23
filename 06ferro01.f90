@@ -12,34 +12,16 @@ m6=1.d0
 J1=1.d0
 J2=0.d0
 J3=0.2d0
-T=0.706597d0
+T=0.00001d0
 h=0.d0
-passot=0.00001d0
+passot=0.1d0
 
 call base (s)
-
-do i=1,64
-
-    Ha(i)=-j1*(s(1,i)*s(2,i)+s(2,i)*s(3,i)+s(3,i)*s(4,i)+s(4,i)*s(5,i)+s(5,i)*s(6,i)+s(6,i)*s(1,i))
-    Ha(i)=Ha(i)-j2*(s(1,i)*s(3,i)+s(1,i)*s(5,i)+s(2,i)*s(4,i)+s(2,i)*s(6,i)+s(3,i)*s(5,i)+s(4,i)*s(6,i))
-    Ha(i)=Ha(i)-j3*(s(1,i)*s(4,i)+s(2,i)*s(5,i)+s(3,i)*s(6,i))
-
-    Ha(i)=-J1*(s(1,i)+s(2,i)+s(3,i)+s(4,i)+s(5,i)+s(6,i))*m1+Ha(i)
-    Ha(i)=-J2*(s(1,i)+s(2,i)+s(3,i)+s(4,i)+s(5,i)+s(6,i))*4*m1+Ha(i)
-    Ha(i)=-J3*(s(1,i)+s(2,i)+s(3,i)+s(4,i)+s(5,i)+s(6,i))*2*m1+Ha(i)
-
-    Ha(i)=(J1*3+J2*12+J3*6)*m1*m1+Ha(i)
-
-    print*, Ha(i)
-end do
-
-
-stop
 
 open(unit=26, file='TesteFE')  
 write(26,*) 'Temperatura',' ','Free',' ','Internal',' ','Heat',' ','Entropia',' ','Mag'
 
-do while (T.lt.10.d0)
+do while (T.lt.3.5d0)
 v=10.d0
     
     call auto(s,T,m1,m2,m3,m4,m5,m6,h,J1,J2,J3) 
@@ -61,9 +43,8 @@ v=10.d0
     Ent=(U-F)/T
     
         write(26,*) t,F,U,C,Ent,mfe,m1,m2,m3,m4,m5,m6
-        print*, t,F,mfe
-        
-    if (T.gt.2.9d0) passot=0.001d0
+        print*, t,mfe
+
     T=T+passot
     Uf=U
 enddo
