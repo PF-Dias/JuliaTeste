@@ -10,27 +10,33 @@ Ha=zeros(Float64,64)
 
 J1=1.0
 m1=1.0
-T=0.00001
-
-#open("06FE_J2-0.0_J3+0.2","w") do io
-
-base(s)       # chama a função que gera a base (6 sítios com spin de Ising)
 
 print("J2=")                        # solicita o valor de J2
-resposta= readline()
-J2= parse(Float64, resposta)
+J2= parse(Float64, readline())
 
 print("J3=")                        # solicita o valor de J3
-resposta= readline()
-J3= parse(Float64, resposta)
+J3= parse(Float64, readline())
+
+print("Temperatura inical=")        # solicita a temperatura inicial
+T= parse(Float64, readline())
+
+print("Tempeatura final=")          # solicita a temperatura final
+Tf= parse(Float64, readline())
 
 print("Passo de temperatura=")      # solicita o passo de temperatura
-resposta= readline()
-passoT= parse(Float64, resposta)
+passoT= parse(Float64, readline())
 
+arquivo="FE_J2=$(J2)_J3=$(J3)"
+open(arquivo,"w") do io
+println(io, "J2=$J2 \t J3=$J3")
+println(io, "T \t m1 \t Z")
+
+tempo1=time()
+
+base(s)                 # chama a função que gera a base (6 sítios com spin de Ising)
 Ha_Intra6(Ha_Intra)
 
-while T ≤ 3.5
+while T < Tf
     global m1,ma1,T,Ha,Ha_Extra
     local Z
     Z=0.0
@@ -39,7 +45,7 @@ while T ≤ 3.5
 
     while erro > 10e-9
         global m1,ma1,Ha,Ha_Extra
-        local Z,v
+        local Z
         Z=0.0
         cont=0
         n=10
@@ -64,10 +70,13 @@ while T ≤ 3.5
     T=round(T,digits=5)
     m1=round(m1,digits=5)
 
-    println("T=",T," ","m=",m1," ","Z=",Z)
-
-    #write(io, "$T\t$m1\t$Z\n")
+    println("T=",T," ","m=",m1)
+    println(io,"$T \t $m1 \t $Z")
 
     T=T+passoT
 end
-#end
+
+tempo2=time()
+tempo=tempo2-tempo1
+println("Tempo de execução = $(round(tempo,digits=4)) segundos")
+end

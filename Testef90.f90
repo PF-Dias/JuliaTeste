@@ -1,8 +1,8 @@
 !redde hexagonal spin 1/2
 !ferromagnetico
 program haxagonal6
-integer:: s(6,64),i
-real*8:: T,m1,J1,J2,J3,Ha0(64),Ha1(64),Ha(64),v,passot
+integer:: s(6,64),taxa,t1,t2
+real*8::mfe,mzz,t,m1,J1,J2,J3,Ha0(64),Ha1(64),Ha(64),h,v,Z,F,passot,tempo
 m1=1.d0
 J1=1.d0
 J2=0.d0
@@ -10,17 +10,24 @@ J3=0.2d0
 T=0.0001d0
 passot=0.0001d0
 
+    ! Obtém a taxa do relógio (ticks por segundo)
+    call system_clock(count_rate=taxa)
+
+    ! Tempo inicial
+    call system_clock(count=t1)
+
 call base (s)
 
 open(unit=26, file='TesteFE')  
 write(26,*) 'Temperatura',' ','Free',' ','Internal',' ','Heat',' ','Entropia',' ','Mag'
 
-call ham0(s,J1,J2,J3,Ha0) 
+    call ham0(s,J1,J2,J3,Ha0)
 
 do while (T.lt.3.5d0)
+v=10.d0
     
-    call auto(s,T,m1,J1,J2,J3) 
-    call ham1(s,J1,J2,J3,Ha1,m1) 
+    call auto(s,T,m1,J1,J2,J3,Ha0) 
+    call ham(s,J1,J2,J3,Ha1,m1) 
     
     do i=1,64
         Ha(i)=Ha0(i)+Ha1(i)
@@ -28,27 +35,35 @@ do while (T.lt.3.5d0)
 
     call mag(s,T,m1,Ha)
     
-        write(26,*) T,m1
+        write(26,*) t,m1
         print*, T,m1
-
+        
+    if (T.gt.2.9d0) passot=0.001d0
     T=T+passot
     Uf=U
 enddo
 print*, 'J3=',J3,'J2=',J2,'FE'
 close(26)
+
+    ! Tempo final
+    call system_clock(count=t2)
+
+    ! Calcula o tempo decorrido em segundos
+    tempo=abs(real(t2 - t1)/real(taxa))
+    print*, "tempo total (segundos)=", tempo
 end
 
 !!!-------------------AUTO CONSISTENCIA-------------------!!!
-subroutine auto(s,T,m1,J1,J2,J3)
+subroutine auto(s,T,m1,J1,J2,J3,Ha0)
 real*8:: T,erro,tol,m1,Ha0(64),Ha1(64),Ha(64),J1,J2,J3,ma1
-integer:: s(6,64),i
+integer:: s(6,64),i,k
 erro=1.d0
 tol=10.d0**(-9.d0)
 ma1=m1
 
   do while (erro.gt.tol)
   
-    call ham1(s,J1,J2,J3,Ha1,ma1)
+    call ham(s,J1,J2,J3,Ha1,ma1)
     
     do i=1,64
         Ha(i)=Ha0(i)+Ha1(i)
@@ -83,20 +98,22 @@ end
 
 !!!-------------------HAMILTONIANO-------------------!!!
 subroutine ham0(s,J1,J2,J3,Ha)
-    implicit none
-    real*8::J1,J2,J3,Ha(64)
-    integer::i,s(6,64)
+implicit none
+real*8::J1,J2,J3,Ha(64)
+integer::i,s(6,64)
+
+ do i=1,64
+
+    Ha(i)=-J1*(s(1,i)*(s(2,i)+s(6,i))+s(3,i)*(s(2,i)+s(4,i))+s(5,i)*(s(4,i)+s(6,i)))
+    Ha(i)=Ha(i)-J2*(s(1,i)*(s(3,i)+s(5,i))+s(2,i)*(s(4,i)+s(6,i))+s(3,i)*s(5,i)+s(4,i)*s(6,i))
+    Ha(i)=Ha(i)-J3*(s(1,i)*s(4,i)+s(2,i)*s(5,i)+s(3,i)*s(6,i))
     
-     do i=1,64
-        Ha(i)=-J1*(s(1,i)*(s(2,i)+s(6,i))+s(3,i)*(s(2,i)+s(4,i))+s(5,i)*(s(4,i)+s(6,i)))
-        Ha(i)=Ha(i)-J2*(s(1,i)*(s(3,i)+s(5,i))+s(2,i)*(s(4,i)+s(6,i))+s(3,i)*s(5,i)+s(4,i)*s(6,i))
-        Ha(i)=Ha(i)-J3*(s(1,i)*s(4,i)+s(2,i)*s(5,i)+s(3,i)*s(6,i))
-    end do
-     
-    end 
+end do
+ 
+end 
 
 !!!-------------------HAMILTONIANO-------------------!!!
-subroutine ham1(s,J1,J2,J3,Ha,m1)
+subroutine ham(s,J1,J2,J3,Ha,m1)
 implicit none
 real*8::J1,J2,J3,Ha(64),m1
 integer::i,s(6,64)
@@ -107,7 +124,7 @@ integer::i,s(6,64)
     Ha(i)=Ha(i)-J2*(s(1,i)+s(2,i)+s(3,i)+s(4,i)+s(5,i)+s(6,i))*4*m1
     Ha(i)=Ha(i)-J3*(s(1,i)+s(2,i)+s(3,i)+s(4,i)+s(5,i)+s(6,i))*2*m1
     Ha(i)=Ha(i)+(J1*3+J2*12+J3*6)*m1*m1
-
+    
 end do
  
 end 
@@ -131,7 +148,6 @@ do f=-1,1,2
     s(4,j)=d
     s(5,j)=e
     s(6,j)=f
-    !print*, s(1,j),s(2,j),s(3,j),s(4,j),s(5,j),s(6,j)
 end do
 end do
 end do
