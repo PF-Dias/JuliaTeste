@@ -38,7 +38,6 @@ v=10.d0
         write(26,*) t,m1
         print*, T,m1
         
-    if (T.gt.2.9d0) passot=0.001d0
     T=T+passot
     Uf=U
 enddo
